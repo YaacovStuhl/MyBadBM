@@ -37,13 +37,10 @@ java {
     }
 }
 
-//sourceSets {
-//    main {
-//        // Registers the Java output directory as a valid resource output
-//        output.dir(java.classesDirectory)
-//        sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
-//    }
-//}
+sourceSets {
+    // Make sure gradle (also) places resource files where IntelliJ wants them
+    sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
+}
 application {
     mainClass = 'edu.touro.mco152.bm.App'
 }

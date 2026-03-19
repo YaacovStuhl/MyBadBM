@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class NonSwingWorker implements UIWorker{
+
+    int progress = 0;
+
     @Override
-    public Boolean runInBackground() {
-        return null;
+    public Boolean runInBackground() throws Exception {
+        return App.worker.runInBackground();
     }
 
     @Override
@@ -38,9 +41,16 @@ public class NonSwingWorker implements UIWorker{
 
     @Override
     public void setMarkProgress(int progress) {
+        if ((progress < 0) || (progress > 100)) {
+            throw new IllegalArgumentException("progress must be between 0 and 100");
+        }
+        this.progress = progress;
 
     }
 
+    public int getMarkProgress() {
+        return progress;
+    }
 
     @Override
     public boolean cancelAction(boolean mayInterruptIfRunning) {
