@@ -50,6 +50,7 @@ public class App {
     public static double wMax = -1, wMin = -1, wAvg = -1;
     public static double rMax = -1, rMin = -1, rAvg = -1;
 
+
     /**
      * @param args the command line arguments
      */
@@ -240,7 +241,7 @@ public class App {
             msg("worker is null abort...");
             return;
         }
-        worker.cancel(true);
+        worker.uiWorker.cancelAction(true);
     }
 
     public static void startBenchmark() {
@@ -264,7 +265,9 @@ public class App {
 
         //4. set up disk worker thread and its event handlers
         worker = new DiskWorker();
-        worker.addPropertyChangeListener((final PropertyChangeEvent event) -> {
+        NewSwingWorker swingWorker = new NewSwingWorker();
+        worker.setUiWorker(swingWorker);
+        worker.uiWorker.addPropertyChangeListener((final PropertyChangeEvent event) -> {
             switch (event.getPropertyName()) {
                 case "progress":
                     int value = (Integer) event.getNewValue();
@@ -285,7 +288,7 @@ public class App {
         });
 
         //5. start the Swing worker thread
-        worker.execute();
+        worker.uiWorker.start();
     }
 
     /**
