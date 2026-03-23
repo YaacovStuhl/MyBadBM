@@ -54,7 +54,7 @@ class UtilTest {
     void randIntLowerBoundary() {
         int min = 50;
         int max = 100;
-        int randomNumber = Util.randInt(min, max);
+        int randomNumber = Util.randInt(min - 50, max - 51);
         assertTrue(randomNumber >= min);
     }
     /**Implicit error call to test E of BICEP by giving an illegal argument, i.e. where the
