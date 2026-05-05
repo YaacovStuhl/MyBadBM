@@ -22,15 +22,15 @@ dependencies {
 // DBMS
     implementation group: 'org.apache.derby', name: 'derby', version: '10.15.2.0'
     implementation group: 'org.apache.derby', name: 'derbyshared', version: '10.15.2.0'
-    // Use JUnit test framework.
-    testImplementation libs.junit
+    // Use JUnit 5 (Jupiter).
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // This dependency is used by the application.
     implementation libs.guava
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
-// Added a meaningless comment so that I could make a commit
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -40,6 +40,10 @@ java {
 sourceSets {
     // Make sure gradle (also) places resource files where IntelliJ wants them
     sourceSets.main.output.resourcesDir = sourceSets.main.java.classesDirectory
+}
+
+test {
+    useJUnitPlatform()
 }
 application {
     mainClass = 'edu.touro.mco152.bm.App'
