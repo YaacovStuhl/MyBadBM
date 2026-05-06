@@ -5,7 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class NonSwingWorker implements UIWorker{
+public class NonSwingWorker implements BenchmarkWorker{
 
     int progress = 0;
 

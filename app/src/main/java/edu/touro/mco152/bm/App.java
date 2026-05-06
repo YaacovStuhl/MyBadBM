@@ -241,7 +241,7 @@ public class App {
             msg("worker is null abort...");
             return;
         }
-        worker.uiWorker.cancelAction(true);
+        worker.benchmarkWorker.cancelAction(true);
     }
 
     public static void startBenchmark() {
@@ -266,8 +266,8 @@ public class App {
         //4. set up disk worker thread and its event handlers
         worker = new DiskWorker();
         NewSwingWorker swingWorker = new NewSwingWorker();
-        worker.setUiWorker(swingWorker);
-        worker.uiWorker.addPropertyChangeListener((final PropertyChangeEvent event) -> {
+        worker.setBenchmarkWorker(swingWorker);
+        worker.benchmarkWorker.addPropertyChangeListener((final PropertyChangeEvent event) -> {
             switch (event.getPropertyName()) {
                 case "progress":
                     int value = (Integer) event.getNewValue();
@@ -288,7 +288,7 @@ public class App {
         });
 
         //5. start the Swing worker thread
-        worker.uiWorker.start();
+        worker.benchmarkWorker.start();
     }
 
     /**
