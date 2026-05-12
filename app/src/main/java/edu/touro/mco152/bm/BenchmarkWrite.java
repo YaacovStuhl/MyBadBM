@@ -1,5 +1,6 @@
 package edu.touro.mco152.bm;
 
+import edu.touro.mco152.bm.command.AbstractBenchmark;
 import edu.touro.mco152.bm.persist.DiskRun;
 import edu.touro.mco152.bm.persist.EM;
 import edu.touro.mco152.bm.ui.Gui;
@@ -15,8 +16,19 @@ import java.util.logging.Logger;
 import static edu.touro.mco152.bm.App.*;
 import static edu.touro.mco152.bm.DiskMark.MarkType.WRITE;
 
-public class BenchmarkWrite {
+public class BenchmarkWrite extends AbstractBenchmark {
     // declare local vars formerly in DiskWorker
+
+    int numMarks;
+    int diskBlocks;
+    int blockSize;
+    DiskRun.BlockSequence blockSequence;
+    BenchmarkWorker benchmarkWorker;
+
+    boolean success = true;//created this so that I could implement a method that would return
+    //a boolean in the ReadBenchmark class but I wanted them to be consistent so i needed this class
+    //to have a similar method. Its a kludge and I think a violation of LSP, but I wasn't sure how to
+    //workaround.
 
     int wUnitsComplete = 0,
             rUnitsComplete = 0,
@@ -27,10 +39,9 @@ public class BenchmarkWrite {
     int unitsTotal = wUnitsTotal + rUnitsTotal;
     float percentComplete;
 
-    int blockSize = blockSizeKb*KILOBYTE;
-    byte [] blockArr = new byte [blockSize];
-    BenchmarkWorker benchmarkWorker;//Very possible this will need to be imported from diskworker
-    public void setBenchmarkWorker(BenchmarkWorker benchmarkWorker) {}
+
+    byte [] blockArr;
+            //= new byte [blockSize];
 
     public void setBlockArr(){
         for(int b=0; b<blockArr.length; b++) {
@@ -43,17 +54,30 @@ public class BenchmarkWrite {
 
     DiskMark wMark;
     int startFileNum = App.nextMarkNumber;
-
-    public BenchmarkWrite(){
+    public BenchmarkWrite(int numMarks, int diskBlocks, int blockSize,  DiskRun.BlockSequence blockSequence,BenchmarkWorker benchmarkWorker) {
+        this.numMarks = numMarks;
+        this.diskBlocks = diskBlocks;
+        this.blockSize = blockSize*KILOBYTE;
+        this.blockSequence = blockSequence;
+        this.benchmarkWorker = benchmarkWorker;
+        blockArr  = new byte [this.blockSize];
         setBlockArr();
     }
-    public void writeBenchmark(BenchmarkWorker benchmarkWorker){
 
 
-        DiskRun run = new DiskRun(DiskRun.IOMode.WRITE, App.blockSequence);
-        run.setNumMarks(App.numOfMarks);
-        run.setNumBlocks(App.numOfBlocks);
-        run.setBlockSize(App.blockSizeKb);
+    @Override
+    public boolean getSuccess() {
+        return success;
+    }
+
+    @Override
+    public boolean execute() throws IOException{
+
+
+        DiskRun run = new DiskRun(DiskRun.IOMode.WRITE, blockSequence);
+        run.setNumMarks(numMarks);
+        run.setNumBlocks(diskBlocks);
+        run.setBlockSize(blockSize);
         run.setTxSize(App.targetTxSizeKb());
         run.setDiskInfo(Util.getDiskInfo(dataDir));
 
@@ -73,7 +97,7 @@ public class BenchmarkWrite {
               that keeps writing data (in its own loop - for specified # of blocks). Each 'Mark' is timed
               and is reported to the GUI for display as each Mark completes.
              */
-        for (int m = startFileNum; m < startFileNum + App.numOfMarks && !benchmarkWorker.checkIsCancelled(); m++) {
+        for (int m = startFileNum; m < startFileNum + numMarks && !benchmarkWorker.checkIsCancelled(); m++) {
 
             if (App.multiFile) {
                 testFile = new File(dataDir.getAbsolutePath()
@@ -92,7 +116,7 @@ public class BenchmarkWrite {
             try {
                 try (RandomAccessFile rAccFile = new RandomAccessFile(testFile, mode)) {
                     for (int b = 0; b < numOfBlocks; b++) {
-                        if (App.blockSequence == DiskRun.BlockSequence.RANDOM) {
+                        if (blockSequence == DiskRun.BlockSequence.RANDOM) {
                             int rLoc = Util.randInt(0, numOfBlocks - 1);
                             rAccFile.seek((long) rLoc * blockSize);
                         } else {
@@ -148,5 +172,8 @@ public class BenchmarkWrite {
         em.getTransaction().commit();
 
         Gui.runPanel.addRun(run);
+
+        return success;
     }
+
 }

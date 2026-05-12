@@ -1,23 +1,14 @@
 package edu.touro.mco152.bm;
 
-import edu.touro.mco152.bm.persist.DiskRun;
-import edu.touro.mco152.bm.persist.EM;
+import edu.touro.mco152.bm.command.Command;
 import edu.touro.mco152.bm.ui.Gui;
 
-import jakarta.persistence.EntityManager;
 import javax.swing.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static edu.touro.mco152.bm.App.*;
-import static edu.touro.mco152.bm.DiskMark.MarkType.READ;
-import static edu.touro.mco152.bm.DiskMark.MarkType.WRITE;
 
 /**
  * Execute disk benchmarking as a Swing-compliant thread (only one of these threads can run at
@@ -39,9 +30,11 @@ import static edu.touro.mco152.bm.DiskMark.MarkType.WRITE;
 
 public class DiskWorker {
 
-    BenchmarkRead read = new BenchmarkRead();
-    BenchmarkWrite write =  new BenchmarkWrite();
     BenchmarkWorker benchmarkWorker;
+    boolean isReadTest = readTest;
+    boolean isWriteTest = writeTest;
+
+
 
     public void setBenchmarkWorker(BenchmarkWorker benchmarkWorker) {
         this.benchmarkWorker = benchmarkWorker;
@@ -81,9 +74,20 @@ public class DiskWorker {
         /*
           The GUI allows a Write, Read, or both types of BMs to be started. They are done serially.
          */
-        if (App.writeTest){
-            write.writeBenchmark(benchmarkWorker);
-        }
+//        if (App.writeTest){
+            Command command = new Command(isWriteTest, isReadTest, numOfMarks,numOfBlocks, blockSizeKb,blockSequence,benchmarkWorker);
+
+//            BenchmarkWrite write =  new BenchmarkWrite(numOfMarks, numOfBlocks,blockSizeKb, blockSequence,benchmarkWorker);
+
+//TODO figure out how to make read test return a boolean;
+
+//             command.
+
+            boolean wasSuccessfull = command.execute();
+            if (!wasSuccessfull) {
+                return false;
+            }
+//        }
 
         /*
           Most benchmarking systems will try to do some cleanup in between 2 benchmark operations to
@@ -104,12 +108,14 @@ public class DiskWorker {
         }
 
         // Same as above, just for Read operations instead of Writes.
-        if (App.readTest) {
-            boolean wasReadSuccessfully = read.readBenchmark(benchmarkWorker);
-            if (!wasReadSuccessfully) {
-                return wasReadSuccessfully;
-            }
-        }
+
+
+//        if (App.readTest) {
+//            BenchmarkRead read = new BenchmarkRead(numOfMarks, numOfBlocks,blockSizeKb, blockSequence, benchmarkWorker);
+//
+//            read.execute();
+//
+//        }
         App.nextMarkNumber += App.numOfMarks;
         return true;
     }

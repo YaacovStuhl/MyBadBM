@@ -1,5 +1,6 @@
 package edu.touro.mco152.bm;
 
+import edu.touro.mco152.bm.command.AbstractBenchmark;
 import edu.touro.mco152.bm.persist.DiskRun;
 import edu.touro.mco152.bm.persist.EM;
 import edu.touro.mco152.bm.ui.Gui;
@@ -17,9 +18,15 @@ import java.util.logging.Logger;
 import static edu.touro.mco152.bm.App.*;
 import static edu.touro.mco152.bm.DiskMark.MarkType.READ;
 
-public class BenchmarkRead {
+public class BenchmarkRead extends AbstractBenchmark {
+
+    int numMarks;
+    int diskBlocks;
+    int blockSize;
+    DiskRun.BlockSequence blockSequence;
+    BenchmarkWorker benchmarkWorker;
+
     // declare local vars formerly in DiskWorker
-    BenchmarkWorker  benchmarkWorker;
     int wUnitsComplete = 0,
             rUnitsComplete = 0,
             unitsComplete;
@@ -28,8 +35,8 @@ public class BenchmarkRead {
     int rUnitsTotal = App.readTest ? numOfBlocks * numOfMarks : 0;
     int unitsTotal = wUnitsTotal + rUnitsTotal;
     float percentComplete;
-    int blockSize = blockSizeKb*KILOBYTE;
-    byte [] blockArr = new byte [blockSize];
+    byte [] blockArr;
+            //= new byte [blockSize];
     public void setBlockArr(){
         for(int b=0; b<blockArr.length; b++) {
             if (b%2==0) {
@@ -39,18 +46,25 @@ public class BenchmarkRead {
     }
     DiskMark rMark;
     int startFileNum = App.nextMarkNumber;
-    boolean readSuccessful;
+    boolean readSuccessful = true;
 
-    public BenchmarkRead(){
+    public BenchmarkRead(int numMarks, int numBlocks, int blockSize, DiskRun.BlockSequence blockSequence,  BenchmarkWorker benchmarkWorker) {
+
+        this.numMarks = numMarks;
+        this.blockSize = blockSize*KILOBYTE;
+        this.blockSequence = blockSequence;
+        this.diskBlocks = numBlocks;
+        this.benchmarkWorker = benchmarkWorker;
+        blockArr = new byte [this.blockSize];
         setBlockArr();
     };
 
-    public Boolean readBenchmark(BenchmarkWorker benchmarkWorker) throws IOException {
+    public boolean execute() throws IOException {
 
-        DiskRun run = new DiskRun(DiskRun.IOMode.READ, App.blockSequence);
-        run.setNumMarks(App.numOfMarks);
-        run.setNumBlocks(App.numOfBlocks);
-        run.setBlockSize(App.blockSizeKb);
+        DiskRun run = new DiskRun(DiskRun.IOMode.READ, blockSequence);
+        run.setNumMarks(numMarks);
+        run.setNumBlocks(diskBlocks);
+        run.setBlockSize(blockSize);
         run.setTxSize(App.targetTxSizeKb());
         run.setDiskInfo(Util.getDiskInfo(dataDir));
 
@@ -59,7 +73,7 @@ public class BenchmarkRead {
         Gui.chartPanel.getChart().getTitle().setVisible(true);
         Gui.chartPanel.getChart().getTitle().setText(run.getDiskInfo());
 
-        for (int m = startFileNum; m < startFileNum + App.numOfMarks && !benchmarkWorker.checkIsCancelled(); m++) {
+        for (int m = startFileNum; m < startFileNum + numMarks && !benchmarkWorker.checkIsCancelled(); m++) {
 
             if (App.multiFile) {
                 testFile = new File(dataDir.getAbsolutePath()
@@ -121,7 +135,9 @@ public class BenchmarkRead {
 
         Gui.runPanel.addRun(run);
 
-
+        return readSuccessful;
+    }
+    public boolean getSuccess() {
         return readSuccessful;
     }
 }
