@@ -35,7 +35,6 @@ public class DiskWorker {
     boolean isWriteTest = writeTest;
 
 
-
     public void setBenchmarkWorker(BenchmarkWorker benchmarkWorker) {
         this.benchmarkWorker = benchmarkWorker;
     }
@@ -69,19 +68,15 @@ public class DiskWorker {
             Gui.resetTestData();
         }
 
-        int startFileNum = App.nextMarkNumber;
-
         /*
           The GUI allows a Write, Read, or both types of BMs to be started. They are done serially.
          */
 //        if (App.writeTest){
-            Command command = new Command(isWriteTest, isReadTest, numOfMarks,numOfBlocks, blockSizeKb,blockSequence,benchmarkWorker);
+            Command command = new Command(isWriteTest, isReadTest, numOfMarks, numOfBlocks, blockSizeKb, blockSequence, benchmarkWorker);
 
 //            BenchmarkWrite write =  new BenchmarkWrite(numOfMarks, numOfBlocks,blockSizeKb, blockSequence,benchmarkWorker);
 
-//TODO figure out how to make read test return a boolean;
 
-//             command.
 
             boolean wasSuccessfull = command.execute();
             if (!wasSuccessfull) {
@@ -109,13 +104,6 @@ public class DiskWorker {
 
         // Same as above, just for Read operations instead of Writes.
 
-
-//        if (App.readTest) {
-//            BenchmarkRead read = new BenchmarkRead(numOfMarks, numOfBlocks,blockSizeKb, blockSequence, benchmarkWorker);
-//
-//            read.execute();
-//
-//        }
         App.nextMarkNumber += App.numOfMarks;
         return true;
     }

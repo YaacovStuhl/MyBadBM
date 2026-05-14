@@ -57,7 +57,7 @@ class NonSwingWorkerTest {
     void runInBackGround() throws Exception {
         DiskWorker uiWorker = new DiskWorker();
         NonSwingWorker nonSwingWorker = new NonSwingWorker();
-        uiWorker.setUiWorker(nonSwingWorker);
+        uiWorker.setBenchmarkWorker(nonSwingWorker);
         App.worker = uiWorker;//I assume this is a big no-no. I was just grasping at straws.
         //I kept getting a null pointer exception and wasn't sure how to fix it
         setupDefaultAsPerProperties();

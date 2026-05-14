@@ -66,11 +66,6 @@ public class BenchmarkWrite extends AbstractBenchmark {
 
 
     @Override
-    public boolean getSuccess() {
-        return success;
-    }
-
-    @Override
     public boolean execute() throws IOException{
 
 

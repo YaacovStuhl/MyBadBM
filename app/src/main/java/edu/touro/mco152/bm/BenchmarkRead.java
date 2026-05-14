@@ -57,7 +57,7 @@ public class BenchmarkRead extends AbstractBenchmark {
         this.benchmarkWorker = benchmarkWorker;
         blockArr = new byte [this.blockSize];
         setBlockArr();
-    };
+    }
 
     public boolean execute() throws IOException {
 
@@ -135,9 +135,6 @@ public class BenchmarkRead extends AbstractBenchmark {
 
         Gui.runPanel.addRun(run);
 
-        return readSuccessful;
-    }
-    public boolean getSuccess() {
         return readSuccessful;
     }
 }
