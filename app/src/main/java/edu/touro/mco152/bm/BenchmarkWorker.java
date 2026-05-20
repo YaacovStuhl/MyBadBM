@@ -5,7 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public interface UIWorker {
+public interface BenchmarkWorker {
     Boolean runInBackground() throws Exception;
 
     void process(List<DiskMark> markList);

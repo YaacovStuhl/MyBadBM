@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class NewSwingWorker extends SwingWorker<Boolean, DiskMark> implements UIWorker {
+public class NewSwingWorker extends SwingWorker<Boolean, DiskMark> implements BenchmarkWorker {
     @Override
     public Boolean runInBackground() throws Exception {
         return doInBackground();
