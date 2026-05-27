@@ -1,9 +1,13 @@
 package edu.touro.mco152.bm;
 
+import edu.touro.mco152.bm.Observers.CustomObservable;
+import edu.touro.mco152.bm.com.SlackObserver;
 import edu.touro.mco152.bm.command.AbstractBenchmark;
 import edu.touro.mco152.bm.persist.DiskRun;
 import edu.touro.mco152.bm.persist.EM;
+import edu.touro.mco152.bm.persist.PersistenceObserver;
 import edu.touro.mco152.bm.ui.Gui;
+import edu.touro.mco152.bm.ui.UIObserver;
 import jakarta.persistence.EntityManager;
 
 import javax.swing.*;
@@ -47,7 +51,10 @@ public class BenchmarkRead extends AbstractBenchmark {
     DiskMark rMark;
     int startFileNum = App.nextMarkNumber;
     boolean readSuccessful = true;
-
+    PersistenceObserver persistenceObserver = new PersistenceObserver();
+    UIObserver uiObserver = new UIObserver();
+    SlackObserver slackObserver = new SlackObserver();
+    CustomObservable customObservable = new CustomObservable();
     public BenchmarkRead(int numMarks, int numBlocks, int blockSize, DiskRun.BlockSequence blockSequence,  BenchmarkWorker benchmarkWorker) {
 
         this.numMarks = numMarks;
@@ -57,6 +64,9 @@ public class BenchmarkRead extends AbstractBenchmark {
         this.benchmarkWorker = benchmarkWorker;
         blockArr = new byte [this.blockSize];
         setBlockArr();
+        customObservable.registerObserver(slackObserver);
+        customObservable.registerObserver(uiObserver);
+        customObservable.registerObserver(persistenceObserver);
     }
 
     public boolean execute() throws IOException {
@@ -128,12 +138,9 @@ public class BenchmarkRead extends AbstractBenchmark {
             /*
               Persist info about the Read BM Run (e.g. into Derby Database) and add it to a GUI panel
              */
-        EntityManager em = EM.getEntityManager();
-        em.getTransaction().begin();
-        em.persist(run);
-        em.getTransaction().commit();
 
-        Gui.runPanel.addRun(run);
+        customObservable.setDiskRun(run);
+        customObservable.updateAll();
 
         return readSuccessful;
     }
