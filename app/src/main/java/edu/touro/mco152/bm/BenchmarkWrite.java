@@ -1,9 +1,13 @@
 package edu.touro.mco152.bm;
 
+import edu.touro.mco152.bm.Observers.CustomObservable;
+import edu.touro.mco152.bm.com.SlackObserver;
 import edu.touro.mco152.bm.command.AbstractBenchmark;
 import edu.touro.mco152.bm.persist.DiskRun;
 import edu.touro.mco152.bm.persist.EM;
+import edu.touro.mco152.bm.persist.PersistenceObserver;
 import edu.touro.mco152.bm.ui.Gui;
+import edu.touro.mco152.bm.ui.UIObserver;
 import jakarta.persistence.EntityManager;
 
 import java.io.File;
@@ -23,7 +27,6 @@ public class BenchmarkWrite extends AbstractBenchmark {
     int diskBlocks;
     int blockSize;
     DiskRun.BlockSequence blockSequence;
-    BenchmarkWorker benchmarkWorker;
 
     boolean success = true;//created this so that I could implement a method that would return
     //a boolean in the ReadBenchmark class but I wanted them to be consistent so i needed this class
@@ -51,6 +54,11 @@ public class BenchmarkWrite extends AbstractBenchmark {
         }
     }
 
+    BenchmarkWorker benchmarkWorker;
+    PersistenceObserver persistenceObserver = new PersistenceObserver();
+    UIObserver uiObserver = new UIObserver();
+    SlackObserver slackObserver = new SlackObserver();
+    CustomObservable customObservable = new CustomObservable();
 
     DiskMark wMark;
     int startFileNum = App.nextMarkNumber;
@@ -62,6 +70,9 @@ public class BenchmarkWrite extends AbstractBenchmark {
         this.benchmarkWorker = benchmarkWorker;
         blockArr  = new byte [this.blockSize];
         setBlockArr();
+        customObservable.registerObserver(slackObserver);
+        customObservable.registerObserver(uiObserver);
+        customObservable.registerObserver(persistenceObserver);
     }
 
 
@@ -161,12 +172,8 @@ public class BenchmarkWrite extends AbstractBenchmark {
             /*
               Persist info about the Write BM Run (e.g. into Derby Database) and add it to a GUI panel
              */
-        EntityManager em = EM.getEntityManager();
-        em.getTransaction().begin();
-        em.persist(run);
-        em.getTransaction().commit();
-
-        Gui.runPanel.addRun(run);
+        customObservable.setDiskRun(run);
+        customObservable.updateAll();
 
         return success;
     }
